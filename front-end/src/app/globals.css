@@ -1,23 +1,49 @@
 @import "tailwindcss";
 
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f9fafb;
+  --foreground: #000000;
+
+  /* cores da marca */
+  --primary: #1d4ed8;       /* azul principal */
+  --primary-dark: #1e40af;  /* azul mais escuro */
+  --secondary: #f97316;     /* laranja */
+  --accent: #22c55e;        /* verdinho para destaques */
 }
+
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+
+  /* mapeando suas cores pra utilitárias do Tailwind */
+  --color-primary: var(--primary);
+  --color-primary-dark: var(--primary-dark);
+  --color-secondary: var(--secondary);
+  --color-accent: var(--accent);
+
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
+
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #e3e1e1;
+    --foreground: #000000;
+
+    --primary: #60a5fa;
+    --primary-dark: #1d4ed8;
+    --secondary: #fdba74;
+    --accent: #4ade80;
   }
 }
+
 
 body {
   background: var(--background);

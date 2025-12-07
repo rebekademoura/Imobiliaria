@@ -1,7 +1,19 @@
+// src/app/login/page.tsx
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { getCurrentUserClient } from "@/src/lib/auth";
+
+type AuthResponse = {
+  token: string;
+  user?: {
+    id?: number;
+    name?: string;
+    email?: string;
+    role?: string;
+  };
+};
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -10,16 +22,35 @@ export default function LoginPage() {
   const [msg, setMsg] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  // Base da API (ex.: http://localhost:8080). Configure em .env.local
   const base = useMemo(() => process.env.NEXT_PUBLIC_API_BASE || "", []);
 
-  // Se já tiver token salvo, manda direto para a área (qualquer rota passada em ?redirect)
+  function getDefaultPathForCurrentUser(): string {
+    const user = getCurrentUserClient();
+
+    if (!user?.role) return "/publica";
+
+    const role = String(user.role).toUpperCase();
+
+    if (role.includes("ADMIN")) return "/privado/admin";
+    if (role.includes("CORRETOR")) return "/privado/corretor";
+
+    return "/publica";
+  }
+
   useEffect(() => {
     const token = localStorage.getItem("token");
-    if (token) {
-      const params = new URLSearchParams(window.location.search);
-      window.location.replace(params.get("redirect") || "/area");
+    if (!token) return;
+
+    const params = new URLSearchParams(window.location.search);
+    const redirectParam = params.get("redirect");
+
+    if (redirectParam) {
+      window.location.replace(redirectParam);
+      return;
     }
+
+    const destino = getDefaultPathForCurrentUser();
+    window.location.replace(destino);
   }, []);
 
   async function onSubmit(e: React.FormEvent) {
@@ -40,24 +71,49 @@ export default function LoginPage() {
       });
 
       if (!r.ok) {
-        // tenta extrair mensagem do back
         let backendMsg = "";
         try {
           const j = await r.json();
           backendMsg = typeof j === "string" ? j : j?.message || "";
         } catch {}
-        throw new Error(backendMsg || `Credenciais inválidas (HTTP ${r.status})`);
+        throw new Error(
+          backendMsg || `Credenciais inválidas (HTTP ${r.status})`
+        );
       }
 
-      const data = await r.json(); // esperado: { token: "..." }
+      const data: AuthResponse = await r.json(); // { token, user }
       if (!data?.token) {
         throw new Error("Resposta inesperada do servidor: token ausente.");
       }
 
+      // token
       localStorage.setItem("token", data.token);
 
+      // 👇 GUARDA TAMBÉM OS DADOS DO USUÁRIO
+      if (data.user) {
+        if (data.user.role) {
+          localStorage.setItem("role", data.user.role);
+        }
+        if (data.user.name) {
+          localStorage.setItem("name", data.user.name);
+        }
+        if (data.user.email) {
+          localStorage.setItem("email", data.user.email);
+        }
+        if (data.user.id != null) {
+          localStorage.setItem("userId", String(data.user.id));
+        }
+      }
+
       const params = new URLSearchParams(window.location.search);
-      window.location.replace(params.get("redirect") || "/area");
+      const redirectParam = params.get("redirect");
+      if (redirectParam) {
+        window.location.replace(redirectParam);
+        return;
+      }
+
+      const destino = getDefaultPathForCurrentUser();
+      window.location.replace(destino);
     } catch (err: any) {
       setMsg(err?.message || "Falha no login.");
     } finally {
