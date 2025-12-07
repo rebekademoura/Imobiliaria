@@ -46,14 +46,19 @@ public class ImovelController {
         }
     }
 
-    @PostMapping
-    public ResponseEntity<Void> insert(@RequestBody ImovelModel model) {
-        model = service.insert(model);
-        // return new ResponseEntity(model, HttpStatus.CREATED);
-        URI uri =
-        ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(model.getId()).toUri();
-        return ResponseEntity.created(uri).build();
-        }
+    
+@PostMapping
+public ResponseEntity<Void> insert(@RequestBody ImovelModel model) {
+    model = service.insert(model);
+    URI uri =
+        ServletUriComponentsBuilder.fromCurrentRequest()
+            .path("/{id}")
+            .buildAndExpand(model.getId())
+            .toUri();
+
+    // 201 Created, sem corpo (apenas Location no header)
+    return ResponseEntity.created(uri).build();
+}
 
     @PutMapping(value = "/{id}")
     public ResponseEntity<Void> update(@RequestBody ImovelModel model, @PathVariable Integer id) {

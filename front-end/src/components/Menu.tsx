@@ -82,14 +82,8 @@ export default function Menu() {
         <div className="flex items-center gap-3 text-sm">
           {!isLogged && (
             <>
-              <Link href="/login" className="hover:text-primary-dark">
+              <Link href="/login" className="border rounded-md px-3 py-1 bg-primary text-white hover:bg-primary-dark">
                 Entrar
-              </Link>
-              <Link
-                href="/cadastro"
-                className="border rounded-md px-3 py-1 bg-primary text-white hover:bg-primary-dark"
-              >
-                Cadastrar
               </Link>
             </>
           )}

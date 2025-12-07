@@ -1,4 +1,3 @@
-// src/main/java/com/example/demo/config/WebConfig.java
 package com.example.demo.config;
 
 import java.util.List;
@@ -17,17 +16,21 @@ public class WebConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
 
-        // front Next.js em dev
+        // Origem do seu front (Next.js)
         config.setAllowedOrigins(List.of("http://localhost:3000"));
-        // métodos permitidos
+        // Ou, se quiser ser mais amplo:
+        // config.setAllowedOriginPatterns(List.of("http://localhost:3000"));
+
+        // Métodos liberados
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        // headers permitidos
+        // Headers que aceitamos (Authorization, Content-Type, etc)
         config.setAllowedHeaders(List.of("*"));
-        // permite enviar cookies/Authorization
+
+        // Se algum dia você usar cookies/autenticação com credenciais
         config.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        // aplica essa config pra todas as rotas
+        // Aplica para todas as rotas da API
         source.registerCorsConfiguration("/**", config);
 
         return source;

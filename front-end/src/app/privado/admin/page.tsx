@@ -11,7 +11,6 @@ import { listarImoveis, criarUsuario } from "@/src/lib/api";
 type FormUsuario = {
   name: string;
   email: string;
-  password: string;
 };
 
 export default function AdminPage() {
@@ -22,7 +21,6 @@ export default function AdminPage() {
   const [formUsuario, setFormUsuario] = useState<FormUsuario>({
     name: "",
     email: "",
-    password: "",
   });
 
   useEffect(() => {
@@ -33,31 +31,25 @@ export default function AdminPage() {
       );
   }, []);
 
-  const token =
-    typeof window !== "undefined"
-      ? localStorage.getItem("token")
-      : null;
-
   async function handleCriarCorretor(e: React.FormEvent) {
     e.preventDefault();
     setMsgUsuario(null);
 
-    if (!token) {
-      setMsgUsuario("Você precisa estar logado como administrador.");
-      return;
-    }
-
     try {
       setSalvandoUsuario(true);
-      await criarUsuario(
-        {
-          ...formUsuario,
-          role: "CORRETOR",
-        },
-        token
+
+      // 🔒 SEMPRE cria como CORRETOR, com senha padrão "trocar123"
+      await criarUsuario({
+        name: formUsuario.name,
+        email: formUsuario.email,
+        role: "CORRETOR",
+        password: "trocar123",
+      });
+
+      setMsgUsuario(
+        "Corretor cadastrado com sucesso. Senha padrão: trocar123"
       );
-      setMsgUsuario("Corretor cadastrado com sucesso.");
-      setFormUsuario({ name: "", email: "", password: "" });
+      setFormUsuario({ name: "", email: "" });
     } catch (error) {
       setMsgUsuario(
         "Erro ao cadastrar corretor: " + (error as Error).message
@@ -68,8 +60,8 @@ export default function AdminPage() {
   }
 
   return (
-  <RequireAuth requireAdmin>
-    <div className="min-h-screen bg-background text-foreground">
+    <RequireAuth requireAdmin>
+      <div className="min-h-screen bg-background text-foreground">
         <Menu />
 
         <main className="max-w-6xl mx-auto px-4 py-6 space-y-6">
@@ -100,6 +92,11 @@ export default function AdminPage() {
               <h2 className="font-semibold text-lg text-primary">
                 Cadastrar corretor
               </h2>
+
+              <p className="text-xs text-foreground/70 mb-1">
+                O corretor será criado com tipo <b>CORRETOR</b> e senha padrão{" "}
+                <b>trocar123</b>.
+              </p>
 
               <form
                 onSubmit={handleCriarCorretor}
@@ -134,24 +131,6 @@ export default function AdminPage() {
                       setFormUsuario((prev) => ({
                         ...prev,
                         email: e.target.value,
-                      }))
-                    }
-                    className="w-full border border-primary/20 rounded-md px-2 py-1 focus:outline-none focus:ring-2 focus:ring-primary/60"
-                    required
-                  />
-                </div>
-
-                <div className="space-y-1">
-                  <label className="block font-medium text-foreground">
-                    Senha
-                  </label>
-                  <input
-                    type="password"
-                    value={formUsuario.password}
-                    onChange={(e) =>
-                      setFormUsuario((prev) => ({
-                        ...prev,
-                        password: e.target.value,
                       }))
                     }
                     className="w-full border border-primary/20 rounded-md px-2 py-1 focus:outline-none focus:ring-2 focus:ring-primary/60"
